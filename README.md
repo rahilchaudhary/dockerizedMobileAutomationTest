@@ -21,7 +21,7 @@ The outcome: real-device automation that doesn't sit behind a specialist. Zero d
 
 ## Architecture
 
-![Pipeline Diagram](docs/pipeline-diagram.svg)
+https://github.com/rahilchaudhary/dockerizedMobileAutomationTest/blob/main/Dockerized_Mobile.jpg
 
 ---
 
