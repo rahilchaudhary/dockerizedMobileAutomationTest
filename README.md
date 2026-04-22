@@ -8,7 +8,14 @@ A Jenkins pipeline that runs an Android test suite on a physical device inside a
 
 ## The Problem
 
-Automation setups that depend on local environment configuration gate execution behind a few engineers. Installing Java, Maven, Appium, ADB, and managing version conflicts on every machine is fragile and time-consuming. This setup removes that gate by containerising the entire test runtime.
+Our Android automation setup problem: only a few engineers could run owing to:
+Specific environment dependencies. Local config files. Manual Appium setup. The automation exists, but it's fragile and gated.
+Our context: a fixed set of Lenovo devices running Android 10, 11, and 13, deployed to schools. Known hardware. Known OS targets. No fragmentation problem to solve.
+
+## The Solution
+Containerise the test runtime. The entire execution environment lives in a Docker image. No local setup. No "works on my machine." Any team member — developer or QA — pulls the image and runs.
+Distribute execution via Jenkins. Register your laptop as a node in a minute. Trigger the suite against your branch before raising a PR, or let the nightly run handle regression. Same pipeline, same device, same results.
+The outcome: real-device automation that doesn't sit behind a specialist. Zero device farm cost. Developers can validate against actual hardware without asking anyone.
 
 ---
 
