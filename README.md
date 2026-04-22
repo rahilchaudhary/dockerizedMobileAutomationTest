@@ -95,11 +95,11 @@ Trigger the pipeline from Jenkins with the following parameters:
 | `APPLICATION` | TestNG XML suite file name | `MyApp` |
 | `ENVIRONMENT` | Target environment | `prod` or `ft` |
 | `SUITE` | Test suite to run | `sanity`, `smoke`, `regression` |
-| `CUCUMBER_TAGS` | Cucumber tag expression | `@Regression` or `(@Login and @Smoke)` |
+| `CUCUMBER_TAGS` | Cucumber tag expression | `(@TeachModule)` |
 | `APPIUM_PORT` | Appium server port inside container | `4723` |
 | `PLATFORM` | Execution platform | `ANDROID` |
 | `BROWSER` | Execution mode | `native` |
-| `REPORT_FOLDER` | Path on local machine where report will be saved | `C:\Reports` |
+| `REPORT_FOLDER` | Path on local machine where report will be saved | `DRIVE:\Reports` |
 
 ---
 
