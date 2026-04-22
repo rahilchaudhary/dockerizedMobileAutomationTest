@@ -1,8 +1,8 @@
 # dockerizedMobileAutomationTest
 Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container
-# Android Real-Device Automation — Containerised CI/CD Pipeline
+# Android Real-Device Automation - Containerised CI/CD Pipeline
 
-A Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container. No device farm. No per-minute billing. Any team member registers their laptop as a Jenkins node in under a minute and runs the suite — nightly or against their own branch.
+A Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container. No device farm. No per-minute billing. Any team member registers their laptop as a Jenkins node in under a minute and runs the suite - nightly or against their own branch.
 
 ---
 
@@ -13,11 +13,16 @@ Specific environment dependencies. Local config files. Manual Appium setup. The 
 Our context: a fixed set of Lenovo devices running Android 10, 11, and 13, deployed to schools. Known hardware. Known OS targets. No fragmentation problem to solve.
 
 ## The Solution
-Containerise the test runtime. The entire execution environment lives in a Docker image. No local setup. No "works on my machine." Any team member — developer or QA — pulls the image and runs.
+Containerise the test runtime. The entire execution environment lives in a Docker image. No local setup. No "works on my machine." Any team member - developer or QA - pulls the image and runs.
 Distribute execution via Jenkins. Register your laptop as a node in a minute. Trigger the suite against your branch before raising a PR, or let the nightly run handle regression. Same pipeline, same device, same results.
 The outcome: real-device automation that doesn't sit behind a specialist. Zero device farm cost. Developers can validate against actual hardware without asking anyone.
 
 ---
+## Trade Offs
+For the device problem: BrowserStack / LambdaTest / AWS Device Farm - cost, and they may not have your exact Lenovo hardware
+For Jenkins distributed nodes:
+- Could have used a single machine everyone SSHes into - single point of failure, queuing problem
+- Could have used GitHub Actions / GitLab CI - but those don't give you easy access to a local machine with a physical device attached
 
 ## Architecture
 
@@ -29,7 +34,7 @@ https://github.com/rahilchaudhary/dockerizedMobileAutomationTest/blob/main/Docke
 
 - **Docker Desktop** installed and running on your local machine
 - **ADB** installed on your local machine. Device connected over WiFi. Run `adb devices` to confirm the device is visible.
-- **Jenkins** instance — local or EC2. Register your machine as a node (takes under a minute).
+- **Jenkins** instance - local or EC2. Register your machine as a node (takes under a minute).
 - **Android device** on the same WiFi network as your machine, with TCP/IP mode enabled on port 5555.
 
 To enable TCP/IP mode on your device (one-time setup):
@@ -50,7 +55,7 @@ Architecture diagram: Dockerized_Mobile.jpg
 
 ---
 
-## Step 1 — Build the base image
+## Step 1 - Build the base image
 
 ```bash
 docker build -f Dockerfile.base -t your-automation-base .
@@ -58,7 +63,7 @@ docker build -f Dockerfile.base -t your-automation-base .
 
 ---
 
-## Step 2 — Build the project image
+## Step 2 - Build the project image
 
 ```bash
 docker build \
@@ -76,13 +81,13 @@ docker build \
 
 ---
 
-## Step 3 — Register your machine as a Jenkins node
+## Step 3 - Register your machine as a Jenkins node
 
 In your Jenkins instance go to **Manage Jenkins → Nodes → New Node**. Select permanent agent. Copy the agent launch command and run it on your machine. Your machine is now a Jenkins node.
 
 ---
 
-## Step 4 — Run the pipeline
+## Step 4 - Run the pipeline
 
 Trigger the pipeline from Jenkins with the following parameters:
 
@@ -105,14 +110,14 @@ Trigger the pipeline from Jenkins with the following parameters:
 
 ## What this does not cover
 
-This setup is designed for a **fixed hardware target** — one device, known OS versions, same network. It is not a fragmentation testing solution and does not support parallel execution across multiple devices. The WiFi dependency means the device and the Jenkins node machine must be on the same network.
+This setup is designed for a **fixed hardware target** - one device, known OS versions, same network. It is not a fragmentation testing solution and does not support parallel execution across multiple devices. The WiFi dependency means the device and the Jenkins node machine must be on the same network.
 
 ---
 
 ## How it works at runtime
 
 1. Jenkins EC2 triggers the pipeline on the registered local node
-2. Pre-flight check verifies the Android device is reachable via ADB — aborts immediately if not
+2. Pre-flight check verifies the Android device is reachable via ADB - aborts immediately if not
 3. Docker pulls the test image from Docker Hub
 4. Container starts, connects to the device over ADB WiFi, and runs the Maven test suite via Appium
 5. Test report is copied from the container to the local machine
