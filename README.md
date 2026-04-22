@@ -1,4 +1,5 @@
 # dockerizedMobileAutomationTest
+This solves the cost and accessibility problem for teams testing on fixed hardware targets
 Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container
 # Android Real-Device Automation - Containerised CI/CD Pipeline
 
