@@ -1,0 +1,37 @@
+# Base: Java + Maven
+FROM maven:3.9.6-eclipse-temurin-17
+
+# Install Node.js + Appium
+RUN apt-get update && apt-get install -y curl wget unzip git iputils-ping && apt-get clean \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g appium@latest \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+# Create .appium directory first
+RUN mkdir -p /root/.appium
+
+# Install driver with proper permissions
+RUN appium driver install uiautomator2
+
+# Verify installation worked
+RUN appium driver list
+
+
+# Install Android platform-tools (adb, fastboot)
+RUN wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
+    && unzip /tmp/platform-tools.zip -d /opt/android-sdk \
+    && rm /tmp/platform-tools.zip \
+    && ln -s /opt/android-sdk/platform-tools/adb /usr/bin/adb
+
+# Set Android environment variables
+    ENV ANDROID_HOME=/opt/android-sdk
+    ENV ANDROID_SDK_ROOT=/opt/android-sdk
+    ENV PATH=$PATH:/opt/android-sdk/platform-tools
+
+# Verify adb
+RUN adb version
+
+
+WORKDIR /app
