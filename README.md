@@ -1,2 +1,113 @@
 # dockerizedMobileAutomationTest
 Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container
+# Android Real-Device Automation — Containerised CI/CD Pipeline
+
+A Jenkins pipeline that runs an Android test suite on a physical device inside a Docker container. No device farm. No per-minute billing. Any team member registers their laptop as a Jenkins node in under a minute and runs the suite — nightly or against their own branch.
+
+---
+
+## The Problem
+
+Automation setups that depend on local environment configuration gate execution behind a few engineers. Installing Java, Maven, Appium, ADB, and managing version conflicts on every machine is fragile and time-consuming. This setup removes that gate by containerising the entire test runtime.
+
+---
+
+## Architecture
+
+![Pipeline Diagram](docs/pipeline-diagram.svg)
+
+---
+
+## Prerequisites
+
+- **Docker Desktop** installed and running on your local machine
+- **ADB** installed on your local machine. Device connected over WiFi. Run `adb devices` to confirm the device is visible.
+- **Jenkins** instance — local or EC2. Register your machine as a node (takes under a minute).
+- **Android device** on the same WiFi network as your machine, with TCP/IP mode enabled on port 5555.
+
+To enable TCP/IP mode on your device (one-time setup):
+```bash
+adb tcpip 5555
+```
+
+---
+
+## Repo Structure
+
+```
+Dockerfile.base         # Base image: Java 17, Maven, Node.js, Appium, UIAutomator2, ADB
+Dockerfile.project      # Project image: clones test repo, sets up runtime entrypoint
+Jenkinsfile             # Parametrised Jenkins pipeline
+docs/
+  pipeline-diagram.svg  # Architecture diagram
+```
+
+---
+
+## Step 1 — Build the base image
+
+```bash
+docker build -f Dockerfile.base -t your-automation-base .
+```
+
+---
+
+## Step 2 — Build the project image
+
+```bash
+docker build \
+  --build-arg REPO_ACCESS_TOKEN=<your-token> \
+  --build-arg GIT_BRANCH=<your-branch> \
+  --no-cache \
+  -f Dockerfile.project \
+  -t <your-image-name> .
+```
+
+| Build arg | Description |
+|---|---|
+| `REPO_ACCESS_TOKEN` | Personal access token with read access to your test repository |
+| `GIT_BRANCH` | Branch to clone into the image |
+
+---
+
+## Step 3 — Register your machine as a Jenkins node
+
+In your Jenkins instance go to **Manage Jenkins → Nodes → New Node**. Select permanent agent. Copy the agent launch command and run it on your machine. Your machine is now a Jenkins node.
+
+---
+
+## Step 4 — Run the pipeline
+
+Trigger the pipeline from Jenkins with the following parameters:
+
+| Parameter | Description | Example |
+|---|---|---|
+| `DEVICE_IP` | IP address of the Android device on your network | `192.168.1.30` |
+| `DOCKER_IMAGE` | Docker Hub image name | `yourusername/your-image` |
+| `IMAGE_TAG` | Image tag | `latest` |
+| `CONTAINER_NAME` | Name for the Docker container | `automation-container` |
+| `APPLICATION` | TestNG XML suite file name | `MyApp` |
+| `ENVIRONMENT` | Target environment | `prod` or `ft` |
+| `SUITE` | Test suite to run | `sanity`, `smoke`, `regression` |
+| `CUCUMBER_TAGS` | Cucumber tag expression | `@Regression` or `(@Login and @Smoke)` |
+| `APPIUM_PORT` | Appium server port inside container | `4723` |
+| `PLATFORM` | Execution platform | `ANDROID` |
+| `BROWSER` | Execution mode | `native` |
+| `REPORT_FOLDER` | Path on local machine where report will be saved | `C:\Reports` |
+
+---
+
+## What this does not cover
+
+This setup is designed for a **fixed hardware target** — one device, known OS versions, same network. It is not a fragmentation testing solution and does not support parallel execution across multiple devices. The WiFi dependency means the device and the Jenkins node machine must be on the same network.
+
+---
+
+## How it works at runtime
+
+1. Jenkins EC2 triggers the pipeline on the registered local node
+2. Pre-flight check verifies the Android device is reachable via ADB — aborts immediately if not
+3. Docker pulls the test image from Docker Hub
+4. Container starts, connects to the device over ADB WiFi, and runs the Maven test suite via Appium
+5. Test report is copied from the container to the local machine
+6. Container is cleaned up regardless of test outcome
