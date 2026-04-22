@@ -19,7 +19,10 @@ The outcome: real-device automation that doesn't sit behind a specialist. Zero d
 
 ---
 ## Trade Offs
-For the device problem: BrowserStack / LambdaTest / AWS Device Farm - cost, and they may not have your exact Lenovo hardware
+
+For the device problem:
+- BrowserStack / LambdaTest / AWS Device Farm - cost, and they may not have your exact Lenovo hardware
+
 For Jenkins distributed nodes:
 - Could have used a single machine everyone SSHes into - single point of failure, queuing problem
 - Could have used GitHub Actions / GitLab CI - but those don't give you easy access to a local machine with a physical device attached
