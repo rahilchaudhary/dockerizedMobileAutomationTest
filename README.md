@@ -45,8 +45,7 @@ adb tcpip 5555
 Dockerfile.base         # Base image: Java 17, Maven, Node.js, Appium, UIAutomator2, ADB
 Dockerfile.project      # Project image: clones test repo, sets up runtime entrypoint
 Jenkinsfile             # Parametrised Jenkins pipeline
-docs/
-  pipeline-diagram.svg  # Architecture diagram
+Architecture diagram: Dockerized_Mobile.jpg
 ```
 
 ---
