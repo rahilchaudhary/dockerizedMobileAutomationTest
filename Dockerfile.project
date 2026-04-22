@@ -1,0 +1,45 @@
+FROM my-automation-base
+
+WORKDIR /app
+
+# Build-time variables
+ARG REPO_ACCESS_TOKEN
+ARG GIT_BRANCH
+
+RUN git clone -b ${GIT_BRANCH} https://x-token-auth:${REPO_ACCESS_TOKEN}@bitbucket.org/REPO.git .
+
+# Pre-download Maven dependencies
+RUN mvn dependency:go-offline -B
+
+# Store branch name for runtime use
+ENV DEFAULT_GIT_BRANCH=${GIT_BRANCH}
+
+# Startup script with proper variable handling
+RUN echo '#!/bin/bash\n\
+\n\
+if [ -n "$REPO_ACCESS_TOKEN" ]; then\n\
+  BRANCH_TO_PULL="${GIT_BRANCH:-$DEFAULT_GIT_BRANCH}"\n\
+  echo "Pulling latest changes from branch: $BRANCH_TO_PULL"\n\
+  git pull https://x-token-auth:${REPO_ACCESS_TOKEN}@bitbucket.org/REPO.git "$BRANCH_TO_PULL" || echo "Git pull failed, using existing code"\n\
+else\n\
+  echo "No REPO_ACCESS_TOKEN provided, using baked-in code"\n\
+fi\n\
+\n\
+if [ -n "$ADB_DEVICE_IP" ]; then\n\
+  echo "Connecting to device at $ADB_DEVICE_IP"\n\
+  adb connect "$ADB_DEVICE_IP"\n\
+  sleep 10\n\
+elif [ -n "$ADB_DEVICE" ]; then\n\
+  echo "Connecting to device at $ADB_DEVICE:5555"\n\
+  adb connect "$ADB_DEVICE:5555"\n\
+  sleep 3\n\
+  adb devices\n\
+  \n\
+else\n\
+  echo "No ADB device specified, skipping connection"\n\
+fi\n\
+\n\
+exec "$@"' > /app/start.sh && chmod +x /app/start.sh
+
+ENTRYPOINT ["/app/start.sh"]
+CMD ["mvn", "clean"]
