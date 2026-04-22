@@ -37,7 +37,7 @@ https://github.com/rahilchaudhary/dockerizedMobileAutomationTest/blob/main/Docke
 
 - **Docker Desktop** installed and running on your local machine
 - **ADB** installed on your local machine. Device connected over WiFi. Run `adb devices` to confirm the device is visible.
-- **Jenkins** instance - local or EC2. Register your machine as a node (takes under a minute).
+- **Jenkins** instance - EC2. Register your machine as a node (takes under a minute).
 - **Android device** on the same WiFi network as your machine, with TCP/IP mode enabled on port 5555.
 
 To enable TCP/IP mode on your device (one-time setup):
